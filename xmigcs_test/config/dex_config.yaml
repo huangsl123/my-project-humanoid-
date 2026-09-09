@@ -1,0 +1,259 @@
+motor_num: 29
+dt: 0.01
+sim: true
+debug: true
+control_tool: keyboard
+joystick:
+  initial_height: 0.87
+  max_height: 0.87
+  min_height: 0.65
+  x_command_offset: 0.0
+  y_command_offset: 0.0
+  yaw_command_offset: 0.0
+  max_x_plus_speed: 1.0
+  max_x_minus_speed: 0.6
+  max_y_speed: 0.5
+  max_yaw_speed: 0.8
+keyboard:
+  initial_height: 0.9
+  forward_command_offset: 0.0
+  lateral_command_offset: 0.0
+  rotation_command_offset: 0
+  height_step: 0.05
+  max_forward_speed: 2.0
+  max_lateral_speed: 0.5
+  max_rotation_speed: 0.5
+xbox:
+  initial_height: 0.89
+  forward_command_offset: 0.0
+  lateral_command_offset: 0.0
+  rotation_command_offset: 0.0
+  height_step: 0.05
+robot_interface:
+  clip_actions: false
+  waist_control_status:
+  - gotoZERO
+  - gotoSTOP
+  - gotoDHZERO
+  - gotoPBHCZERO
+  - gotoPBHC
+  - gotoDH
+  - gotoBEYONDMIMIC
+  - gotoVELOCITY
+  - gotoMLP
+  - gotoBEYONDZERO
+  - gotoHhdGetUp
+  legs_control_status: []
+  arms_control_status:
+  - gotoZERO
+  - gotoSTOP
+  - gotoDHZERO
+  - gotoPBHCZERO
+  - gotoPBHC
+  - gotoDH
+  - gotoBEYONDMIMIC
+  - gotoVELOCITY
+  - gotoMLP
+  - gotoBEYONDZERO
+  - gotoHhdGetUp
+  xsense_data_roll_offset: 0.0
+  zero_pos:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  ct_scale:
+  - 2.1
+  - 2.1
+  - 3.207
+  - 2.673
+  - 2.6
+  - 2.6
+  - 2.1
+  - 2.1
+  - 3.207
+  - 2.673
+  - 2.6
+  - 2.6
+  - 3.207
+  - 3.207
+  - 3.207
+  - 3.207
+  - 2.28
+  - 5.89
+  - 5.89
+  - 3.35
+  - 2.3
+  - 2.3
+  - 3.207
+  - 2.28
+  - 5.89
+  - 5.89
+  - 3.35
+  - 2.3
+  - 2.3
+  disable_joints: false
+  joint_limits:
+    l_hip_pitch:
+      min: -3.14
+      max: 3.14
+    l_hip_roll:
+      min: -0.47
+      max: 2.62
+    l_hip_yaw:
+      min: -1.57
+      max: 4.54
+    l_knee:
+      min: -0.09
+      max: 2.53
+    l_ankle_pitch:
+      min: -1.22
+      max: 0.52
+    l_ankle_roll:
+      min: -0.52
+      max: 0.52
+    r_hip_pitch:
+      min: -3.14
+      max: 3.14
+    r_hip_roll:
+      min: -0.47
+      max: 2.62
+    r_hip_yaw:
+      min: -1.57
+      max: 4.54
+    r_knee:
+      min: -0.09
+      max: 2.53
+    r_ankle_pitch:
+      min: -1.22
+      max: 0.52
+    r_ankle_roll:
+      min: -0.52
+      max: 0.52
+    waist_yaw:
+      min: -2.97
+      max: 3.14
+    waist_roll:
+      min: -0.52
+      max: 0.52
+    waist_pitch:
+      min: -0.52
+      max: 1.05
+    l_shoulder_pitch:
+      min: -2.97
+      max: 2.97
+    l_shoulder_roll:
+      min: -0.26
+      max: 3.4
+    l_shoulder_yaw:
+      min: -2.97
+      max: 2.97
+    l_elbow:
+      min: -2.62
+      max: 0.26
+    l_wrist_yaw:
+      min: -2.97
+      max: 2.97
+    l_wrist_pitch:
+      min: -1.31
+      max: 1.4
+    l_wrist_roll:
+      min: -1.05
+      max: 0.79
+    r_shoulder_pitch:
+      min: -2.97
+      max: 2.97
+    r_shoulder_roll:
+      min: -3.4
+      max: 0.26
+    r_shoulder_yaw:
+      min: -2.97
+      max: 2.97
+    r_elbow:
+      min: -2.62
+      max: 0.26
+    r_wrist_yaw:
+      min: -2.97
+      max: 2.97
+    r_wrist_pitch:
+      min: -1.31
+      max: 1.4
+    r_wrist_roll:
+      min: -0.79
+      max: 1.05
+  ankle_kp_p:
+  - 15.0
+  - 15.0
+  - 15.0
+  - 15.0
+  ankle_kd_p:
+  - 1.25
+  - 1.25
+  - 1.25
+  - 1.25
+beyond_mimic_variants:
+- name: down
+  config_path: policy/beyond_mimic/config/BeyondMimic_down.yaml
+- name: up
+  config_path: policy/beyond_mimic/config/BeyondMimic_up.yaml
+- name: dance
+  config_path: policy/beyond_mimic/config/BeyondMimic_dance2_medium.yaml
+- name: weibst_hard
+  config_path: policy/beyond_mimic/config/BeyondMimic_weibst_hard.yaml
+- name: dance1_link24
+  config_path: policy/beyond_mimic/config/BeyondMimic_dance1_link24.yaml
+- name: kick
+  config_path: policy/beyond_mimic/config/BeyondMimic_kick.yaml
+- name: jumpover_29dof
+  config_path: policy/beyond_mimic/config/BeyondMimic_29dof_jumpover.yaml
+- name: sit_stand
+  config_path: policy/beyond_mimic/config/BeyondMimic_sit_stand.yaml
+- name: sit_chair
+  config_path: policy/beyond_mimic/config/BeyondMimic_sit_chair.yaml
+- name: squart
+  config_path: policy/beyond_mimic/config/BeyondMimic_squart.yaml
+- name: stairs
+  config_path: policy/beyond_mimic/config/BeyondMimic_stairs.yaml
+- name: jump_box
+  config_path: policy/beyond_mimic/config/BeyondMimic_jump_box.yaml
+- name: climb_stairs
+  config_path: policy/beyond_mimic/config/BeyondMimic_climb_stairs.yaml
+- name: fight_sports1
+  config_path: policy/beyond_mimic/config/BeyondMimic_fight_sports1.yaml
+- name: jumps1
+  config_path: policy/beyond_mimic/config/BeyondMimic_jumps1.yaml
+- name: ground2
+  config_path: policy/beyond_mimic/config/BeyondMimic_ground2.yaml
+- name: push_stumble1
+  config_path: policy/beyond_mimic/config/BeyondMimic_push_stumble1.yaml
+- name: fight1
+  config_path: policy/beyond_mimic/config/BeyondMimic_fight1.yaml
+- name: fall_getup1
+  config_path: policy/beyond_mimic/config/BeyondMimic_fall_getup1.yaml
+- name: complex_choreography_v1
+  config_path: policy/beyond_mimic/config/BeyondMimic_complex_choreography_v1.yaml

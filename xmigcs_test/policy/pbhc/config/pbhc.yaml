@@ -1,0 +1,38 @@
+num_actions: 29
+motor_num: 29
+generated_command_dim: 67           # 3(anchor pos) + 6(anchor ori) + 29(ref pos) + 29(ref vel)
+num_obs: 532
+obs_history_len: 4
+dt: 0.01                            # policy integration step
+# motion_dt: 0.033                    # duration between keyframes in motion lib (optional fallback)
+# motion_file: "convert_dance_dex_v3_inter1.0_S0-30_E510-30_inter1.0_S0-30_E570-30.pkl"
+# motion_file: "convert_walk_full_dex_v3_inter0.5_S0-30_E7837-30.pkl" 
+# motion_file: "convert_fall_and_down_dex_v3_inter0.5_S0-30_E2061-30.pkl" 
+# motion_file: "/home/mig/xsim_1020/xmigcs_old/policy/pbhc/config/convert_kungfu_dex_v3.pkl" 
+# motion_file: "/home/mig/xsim_1020/xmigcs/policy/pbhc/config/convert_stand_dex_v3.pkl" 
+motion_file: "convert_sitting_and_stand.pkl" 
+
+ # used when motion file lacks explicit fps
+ # motion_cycle_time: 31.5
+# motion_cycle_time: 264
+
+# motion_cycle_time: 5            # seconds, used for phase scheduling (380 * 0.033)
+# motion_cycle_time: 23.57
+# motion_cycle_time: 63.03
+motion_cycle_time: 10.867
+
+
+# default joint angles (29 DOF, order matches policy output / robot joint order)
+default_angles: [
+   0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+   0.0,  0.0,  0.0,  0.0,  0.0,  0.0,
+   0.0,  0.0,  0.0,
+   0.0,  0.3,  0.0,  0.0,  0.0,  0.0, 0.0,
+   0.0, -0.3,  0.0,  0.0,  0.0,  0.0, 0.0,
+]
+
+ang_vel_scale: 0.25
+dof_pos_scale: 1.0
+dof_vel_scale: 0.05
+action_scale: 0.25
+
