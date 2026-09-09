@@ -1,0 +1,158 @@
+from __future__ import annotations
+
+import torch
+from typing import TYPE_CHECKING
+
+from isaaclab.assets import Articulation
+from isaaclab.managers import SceneEntityCfg
+from isaaclab.sensors import ContactSensor
+from isaaclab.utils.math import quat_error_magnitude
+
+from whole_body_tracking.tasks.tracking.mdp.commands import MotionCommand
+
+if TYPE_CHECKING:
+    from isaaclab.envs import ManagerBasedRLEnv
+
+
+def _get_body_indexes(command: MotionCommand, body_names: list[str] | None) -> list[int]:
+    return [i for i, name in enumerate(command.cfg.body_names) if (body_names is None) or (name in body_names)]
+
+
+def motion_global_anchor_position_error_exp(env: ManagerBasedRLEnv, command_name: str, std: float) -> torch.Tensor:
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    error = torch.sum(torch.square(command.anchor_pos_w - command.robot_anchor_pos_w), dim=-1)
+    return torch.exp(-error / std**2)
+
+
+def motion_global_anchor_xy_position_error_exp(
+    env: ManagerBasedRLEnv, command_name: str, std: float
+) -> torch.Tensor:
+    """Reward pelvis XY tracking relative to the original global motion path.
+
+    This does not attract the robot to the terrain origin.  The target remains
+    the motion's time-varying pelvis XY position (offset by the environment
+    origin), so any intentional planar translation in the source motion is
+    preserved.
+    """
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    error_xy = command.anchor_pos_w[:, :2] - command.robot_anchor_pos_w[:, :2]
+    return torch.exp(-torch.sum(torch.square(error_xy), dim=-1) / std**2)
+
+
+def motion_global_anchor_xy_velocity_error_exp(
+    env: ManagerBasedRLEnv, command_name: str, std: float
+) -> torch.Tensor:
+    """Reward pelvis XY velocity tracking without constraining absolute position."""
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    error_xy = command.anchor_lin_vel_w[:, :2] - command.robot_anchor_lin_vel_w[:, :2]
+    return torch.exp(-torch.sum(torch.square(error_xy), dim=-1) / std**2)
+
+
+def motion_joint_position_error_exp(
+    env: ManagerBasedRLEnv, command_name: str, std: float
+) -> torch.Tensor:
+    """Reward direct joint-angle fidelity to the source motion."""
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    error = torch.sum(torch.square(command.joint_pos - command.robot_joint_pos), dim=-1)
+    return torch.exp(-error / std**2)
+
+
+def motion_global_anchor_orientation_error_exp(env: ManagerBasedRLEnv, command_name: str, std: float) -> torch.Tensor:
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    error = quat_error_magnitude(command.anchor_quat_w, command.robot_anchor_quat_w) ** 2
+    return torch.exp(-error / std**2)
+
+
+def motion_relative_body_position_error_exp(
+    env: ManagerBasedRLEnv, command_name: str, std: float, body_names: list[str] | None = None
+) -> torch.Tensor:
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    body_indexes = _get_body_indexes(command, body_names)
+    error = torch.sum(
+        torch.square(command.body_pos_relative_w[:, body_indexes] - command.robot_body_pos_w[:, body_indexes]), dim=-1
+    )
+    return torch.exp(-error.mean(-1) / std**2)
+
+
+def motion_relative_body_position_error_l1(
+    env: ManagerBasedRLEnv, command_name: str, body_names: list[str] | None = None
+) -> torch.Tensor:
+    """Mean body-position distance, used as a direct precision penalty."""
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    body_indexes = _get_body_indexes(command, body_names)
+    distance = torch.norm(
+        command.body_pos_relative_w[:, body_indexes] - command.robot_body_pos_w[:, body_indexes], dim=-1
+    )
+    return distance.mean(dim=-1)
+
+
+def motion_relative_body_position_worst_quartile_error(
+    env: ManagerBasedRLEnv, command_name: str, body_names: list[str] | None = None
+) -> torch.Tensor:
+    """Mean distance of the worst-positioned body quartile.
+
+    The standard exponential term averages squared errors across all tracked
+    bodies.  A few inaccurate limbs can therefore be hidden by many accurate
+    torso links.  This term supplies a direct gradient for those outliers.
+    """
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    body_indexes = _get_body_indexes(command, body_names)
+    distance = torch.norm(
+        command.body_pos_relative_w[:, body_indexes] - command.robot_body_pos_w[:, body_indexes], dim=-1
+    )
+    count = max(1, (len(body_indexes) + 3) // 4)
+    return torch.topk(distance, k=count, dim=-1, largest=True, sorted=False).values.mean(dim=-1)
+
+
+def motion_relative_body_orientation_error_exp(
+    env: ManagerBasedRLEnv, command_name: str, std: float, body_names: list[str] | None = None
+) -> torch.Tensor:
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    body_indexes = _get_body_indexes(command, body_names)
+    error = (
+        quat_error_magnitude(command.body_quat_relative_w[:, body_indexes], command.robot_body_quat_w[:, body_indexes])
+        ** 2
+    )
+    return torch.exp(-error.mean(-1) / std**2)
+
+
+def motion_global_body_linear_velocity_error_exp(
+    env: ManagerBasedRLEnv, command_name: str, std: float, body_names: list[str] | None = None
+) -> torch.Tensor:
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    body_indexes = _get_body_indexes(command, body_names)
+    error = torch.sum(
+        torch.square(command.body_lin_vel_w[:, body_indexes] - command.robot_body_lin_vel_w[:, body_indexes]), dim=-1
+    )
+    return torch.exp(-error.mean(-1) / std**2)
+
+
+def motion_global_body_angular_velocity_error_exp(
+    env: ManagerBasedRLEnv, command_name: str, std: float, body_names: list[str] | None = None
+) -> torch.Tensor:
+    command: MotionCommand = env.command_manager.get_term(command_name)
+    body_indexes = _get_body_indexes(command, body_names)
+    error = torch.sum(
+        torch.square(command.body_ang_vel_w[:, body_indexes] - command.robot_body_ang_vel_w[:, body_indexes]), dim=-1
+    )
+    return torch.exp(-error.mean(-1) / std**2)
+
+
+def feet_contact_time(env: ManagerBasedRLEnv, sensor_cfg: SceneEntityCfg, threshold: float) -> torch.Tensor:
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    first_air = contact_sensor.compute_first_air(env.step_dt, env.physics_dt)[:, sensor_cfg.body_ids]
+    last_contact_time = contact_sensor.data.last_contact_time[:, sensor_cfg.body_ids]
+    reward = torch.sum((last_contact_time < threshold) * first_air, dim=-1)
+    return reward
+
+
+def torque_sum_excess(
+    env: ManagerBasedRLEnv, threshold: float, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")
+) -> torch.Tensor:
+    """Compute summed torque excess above a threshold (zero when under the limit)."""
+    asset: Articulation = env.scene[asset_cfg.name]
+    if asset_cfg.joint_ids is None:
+        asset_cfg.joint_ids = slice(None)
+
+    torque_sum = torch.sum(torch.abs(asset.data.applied_torque[:, asset_cfg.joint_ids]), dim=1)
+    return torch.clamp(torque_sum - threshold, min=0.0)

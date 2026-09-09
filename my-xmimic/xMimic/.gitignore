@@ -1,0 +1,38 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+logs/
+motion_data/
+outputs/
+wandb/
+runs/
+
+*.egg-info/
+build/
+dist/
+
+.vscode/
+.idea/
+
+# Local xMimic training outputs
+logs/
+*.log
+*.bak
+__pycache__/
+*.py[cod]
+.vscode/
+
+# Local training outputs
+logs/
+*.log
+*.bak
+__pycache__/
+*.py[cod]
+.vscode/
+
+# Generated training artifacts
+artifacts/
+logs/
+*.log
